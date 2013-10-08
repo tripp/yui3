@@ -1575,7 +1575,6 @@ Y.CartesianChart = Y.Base.create("cartesianChart", Y.Widget, [Y.ChartBase, Y.Ren
             graph.get("boundingBox").setStyle("top", graphY + "px");
             graph.set("width", graphWidth);
             graph.set("height", graphHeight);
-            graph.get("boundingBox").setStyle("overflow", graphOverflow);
         }
 
         if(this._overlay)

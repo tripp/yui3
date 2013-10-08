@@ -307,7 +307,8 @@ Y.CartesianSeries = Y.Base.create("cartesianSeries", Y.SeriesBase, [], {
             xcoords,
             ycoords,
             xOriginValue = xAxis.getOrigin(),
-            yOriginValue = yAxis.getOrigin();
+            yOriginValue = yAxis.getOrigin(),
+            seriesBounds = {};
         graphic.set("width", w);
         graphic.set("height", h);
         xOffset = xOffset + leftPadding;
@@ -317,8 +318,13 @@ Y.CartesianSeries = Y.Base.create("cartesianSeries", Y.SeriesBase, [], {
 
         xcoords = this._getCoords(xMin, xMax, dataWidth, xData, xAxis, xOffset, false);
         ycoords = this._getCoords(yMin, yMax, dataHeight, yData, yAxis, yOffset, reverseYCoords);
+        seriesBounds.bottom = h;
+        seriesBounds.top = 0;
+        seriesBounds.left = 0;
+        seriesBounds.right = w;
         this.set("xcoords", xcoords);
 		this.set("ycoords", ycoords);
+        this.set("seriesBounds", seriesBounds);
         this._dataLength = dataLength;
         this._setXMarkerPlane(xcoords, dataLength);
         this._setYMarkerPlane(ycoords, dataLength);
@@ -648,6 +654,15 @@ Y.CartesianSeries = Y.Base.create("cartesianSeries", Y.SeriesBase, [], {
          */
 }, {
     ATTRS: {
+        /**
+         * An object containing the top, right, bottom and left values of the series'
+         * bounds.
+         *
+         * @attribute seriesBounds
+         * @type Object
+         */
+        seriesBounds: {},
+
         /**
          * An array of all series of the same type used within a chart application.
          *

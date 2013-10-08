@@ -80,6 +80,8 @@ Lines.prototype = {
             nextX,
             nextY,
             i,
+            m,
+            seriesBounds = this.get("seriesBounds"),
             styles = this.get("styles").line,
             lineType = styles.lineType,
             lc = styles.color || this._getDefaultColor(this.get("graphOrder"), "line"),
@@ -122,34 +124,132 @@ Lines.prototype = {
                 noPointsRendered = false;
                 path.moveTo(nextX, nextY);
             }
-            else if(lastPointValid)
-            {
-                if(lineType !== "dashed")
-                {
-                    path.lineTo(nextX, nextY);
-                }
-                else
-                {
-                    this.drawDashedLine(path, lastValidX, lastValidY, nextX, nextY,
-                                                dashLength,
-                                                gapSpace);
-                }
-            }
-            else if(!connectDiscontinuousPoints)
-            {
-                path.moveTo(nextX, nextY);
-            }
             else
             {
-                if(discontinuousType !== "solid")
+                m = (nextY - lastValidY) / (nextX - lastValidX);
+                
+                //stop line at appropriate point corresponding to the minimum/maximum y-value
+                if(lastValidY > seriesBounds.bottom)
                 {
-                    this.drawDashedLine(path, lastValidX, lastValidY, nextX, nextY,
-                                                discontinuousDashLength,
-                                                discontinuousGapSpace);
+                    if(nextY <= seriesBounds.bottom)
+                    {
+                        path.moveTo( ((seriesBounds.bottom - nextY)/m) + nextX, seriesBounds.bottom );
+                    }
+                    else
+                    {
+                        lastValidX = nextX;
+                        lastValidY = nextY;
+                        lastPointValid = true;
+                        continue;
+                    }
+                }
+                else if(lastValidY < seriesBounds.top)
+                {
+                    if(nextY >= seriesBounds.top)
+                    {
+                        path.moveTo( ((seriesBounds.top - nextY)/m) + nextX, seriesBounds.top );
+                    }
+                    else
+                    {
+                        lastValidX = nextX;
+                        lastValidY = nextY;
+                        lastPointValid = true;
+                        continue;
+                    }
+                }
+                
+                //start line at appropriate point corresponding to the minimum/maximum y-value
+                if(nextY > seriesBounds.bottom && lastValidY <= seriesBounds.bottom)
+                {
+                    path.lineTo( ((seriesBounds.bottom - nextY)/m) + nextX, seriesBounds.bottom);
+                    lastValidX = nextX;
+                    lastValidY = nextY;
+                    lastPointValid = true;
+                    continue;
+                }
+                else if(nextY < seriesBounds.top && lastValidY >= seriesBounds.top)
+                {
+                    path.lineTo( ((seriesBounds.top - nextY)/m) + nextX, seriesBounds.top );
+                    lastValidX = nextX;
+                    lastValidY = nextY;
+                    lastPointValid = true;
+                    continue;
+                }
+
+                if(lastValidX < seriesBounds.left)
+                {
+                    if(nextX >= seriesBounds.left)
+                    {
+                        path.moveTo(seriesBounds.left, (( seriesBounds.left - nextX) * m) + nextY);
+                    }
+                    else
+                    {
+                        lastValidX = nextX;
+                        lastValidY = nextY;
+                        lastPointValid = true;
+                        continue;
+                    }
+                }
+                else if(lastValidX > seriesBounds.right)
+                {
+                    if(nextX <= seriesBounds.right)
+                    {
+                        path.moveTo(seriesBounds.right, (( seriesBounds.right - nextX) * m) + nextY);
+                    }
+                    else
+                    {
+                        lastValidX = nextX;
+                        lastValidY = nextY;
+                        lastPointValid = true;
+                        continue;
+                    }
+                }
+
+                if(nextX < seriesBounds.left && lastValidX >= seriesBounds.left)
+                {
+                    path.lineTo(seriesBounds.left, ((seriesBounds.left - nextX) * m) + nextY);
+                    lastValidX = nextX;
+                    lastValidY = nextY;
+                    lastPointValid = true;
+                    continue;
+                }
+                else if(nextX > seriesBounds.right && lastValidX <= seriesBounds.right)
+                {
+                    path.lineTo(seriesBounds.right, ((seriesBounds.right - nextX) * m) + nextY);
+                    lastValidX = nextX;
+                    lastValidY = nextY;
+                    lastPointValid = true;
+                    continue;
+                }
+                if(lastPointValid)
+                {
+                    if(lineType !== "dashed")
+                    {
+                        path.lineTo(nextX, nextY);
+                    }
+                    else
+                    {
+                        this.drawDashedLine(path, lastValidX, lastValidY, nextX, nextY,
+                                                    dashLength,
+                                                    gapSpace);
+                    }
+                }
+                else if(!connectDiscontinuousPoints)
+                {
+                    path.moveTo(nextX, nextY);
                 }
                 else
                 {
-                    path.lineTo(nextX, nextY);
+                    if(discontinuousType !== "solid")
+                    {
+                        this.drawDashedLine(path, lastValidX, lastValidY, nextX, nextY,
+                                                    discontinuousDashLength,
+                                                    discontinuousGapSpace);
+                    }
+                    else
+                    {
+                        path.lineTo(nextX, nextY);
+                    }
                 }
             }
             lastValidX = nextX;

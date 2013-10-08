@@ -68,7 +68,8 @@ Plots.prototype = {
             fillColors = null,
             borderColors = null,
             graphOrder = this.get("graphOrder"),
-            groupMarkers = this.get("groupMarkers");
+            groupMarkers = this.get("groupMarkers"),
+            seriesBounds = this.get("seriesBounds");
         if(groupMarkers)
         {
             xvalues = [];
@@ -103,13 +104,22 @@ Plots.prototype = {
         this._createMarkerCache();
         for(; i < len; ++i)
         {
-            top = parseFloat(ycoords[i] - offsetHeight);
-            left = parseFloat(xcoords[i] - offsetWidth);
-            if(!isNumber(left) || !isNumber(top))
+            top = parseFloat(ycoords[i]);
+            left = parseFloat(xcoords[i]);
+            if(
+                !isNumber(left)
+                || !isNumber(top)
+                || top < seriesBounds.top
+                || left < seriesBounds.left
+                || left > seriesBounds.right
+                || top > seriesBounds.bottom
+            )
             {
                 this._markers.push(null);
                 continue;
             }
+            top = top - offsetHeight;
+            left = left - offsetHeight;
             if(fillColors)
             {
                 style.fill.color = fillColors[i % fillColors.length];
