@@ -683,7 +683,9 @@ Y.extend(SVGGraphic, Y.GraphicBase, {
             computedHeight,
             computedLeft,
             computedTop,
-            node;
+            node,
+            key,
+            shapes = this._shapes;
         if(autoSize)
         {
             if(autoSize === "sizeContentToGraphic")
@@ -715,6 +717,11 @@ Y.extend(SVGGraphic, Y.GraphicBase, {
                 computedHeight = height;
                 computedLeft = left;
                 computedTop = top;
+        }
+        for(key in shapes) {
+            if(shapes.hasOwnProperty(key)) {
+                shapes[key]._clearFlags();
+            }
         }
         if(this._contentNode)
         {

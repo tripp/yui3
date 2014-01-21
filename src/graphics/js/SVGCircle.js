@@ -34,15 +34,14 @@
      */
     _draw: function()
     {
-        var node = this.node,
-            x = this.get("x"),
+        var x = this.get("x"),
             y = this.get("y"),
             radius = this.get("radius"),
             cx = x + radius,
             cy = y + radius;
-        node.setAttribute("r", radius);
-        node.setAttribute("cx", cx);
-        node.setAttribute("cy", cy);
+        this._nodeAttrFlags.r = radius;
+        this._nodeAttrFlags.cx = cx;
+        this._nodeAttrFlags.cy = cy;
         this._fillChangeHandler();
         this._strokeChangeHandler();
         this._updateTransform();
