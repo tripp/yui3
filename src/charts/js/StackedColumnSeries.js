@@ -239,6 +239,7 @@ Y.StackedColumnSeries = Y.Base.create("stackedColumnSeries", Y.ColumnSeries, [Y.
                 markerStyles.border.color = this._getItemColor(markerStyles.border.color, i);
             }
             marker.set(markerStyles);
+            marker.get("graphic")._redraw();
         }
     },
 

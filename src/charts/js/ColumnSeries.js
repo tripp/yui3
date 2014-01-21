@@ -105,6 +105,7 @@ Y.ColumnSeries = Y.Base.create("columnSeries", Y.MarkerSeries, [Y.Histogram], {
                     }
                 }
             }
+            marker.get("graphic")._redraw();
         }
     }
 }, {

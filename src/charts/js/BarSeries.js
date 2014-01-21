@@ -105,6 +105,7 @@ Y.BarSeries = Y.Base.create("barSeries", Y.MarkerSeries, [Y.Histogram], {
                     }
                 }
             }
+            marker.get("graphic")._redraw();
         }
     }
 }, {

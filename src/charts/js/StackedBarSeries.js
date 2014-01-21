@@ -238,6 +238,7 @@ Y.StackedBarSeries = Y.Base.create("stackedBarSeries", Y.BarSeries, [Y.StackingU
                 markerStyles.border.color = this._getItemColor(markerStyles.border.color, i);
             }
             marker.set(markerStyles);
+            marker.get("graphic")._redraw();
         }
     },
 

@@ -418,6 +418,7 @@ Plots.prototype = {
                 marker.set("x", (xcoords[i] - w/2));
                 marker.set("y",  (ycoords[i] - h/2));
                 marker.set("visible", this.get("visible"));
+                marker.get("graphic")._redraw();
         }
     },
 
