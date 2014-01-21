@@ -696,7 +696,6 @@ SVGDrawing.prototype = {
             val,
             i,
             path = "",
-            node = this.node,
             left = parseFloat(this._left),
             top = parseFloat(this._top),
             fill = this.get("fill");
@@ -764,7 +763,7 @@ SVGDrawing.prototype = {
             Y.Lang.trim(path);
             if(path)
             {
-                node.setAttribute("d", path);
+                this._nodeAttrFlags.d = path;
             }
 
             this._path = path;

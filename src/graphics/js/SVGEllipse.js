@@ -33,8 +33,7 @@ Y.extend(SVGEllipse, SVGShape, {
 	 */
 	_draw: function()
 	{
-		var node = this.node,
-			w = this.get("width"),
+		var w = this.get("width"),
 			h = this.get("height"),
 			x = this.get("x"),
 			y = this.get("y"),
@@ -42,10 +41,10 @@ Y.extend(SVGEllipse, SVGShape, {
 			yRadius = h * 0.5,
 			cx = x + xRadius,
 			cy = y + yRadius;
-		node.setAttribute("rx", xRadius);
-		node.setAttribute("ry", yRadius);
-		node.setAttribute("cx", cx);
-		node.setAttribute("cy", cy);
+		this._nodeAttrFlags.rx = xRadius;
+		this._nodeAttrFlags.ry = yRadius;
+		this._nodeAttrFlags.cx = cx;
+		this._nodeAttrFlags.cy = cy;
 		this._fillChangeHandler();
 		this._strokeChangeHandler();
 		this._updateTransform();
