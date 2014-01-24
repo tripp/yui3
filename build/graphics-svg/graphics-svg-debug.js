@@ -698,7 +698,6 @@ SVGDrawing.prototype = {
             val,
             i,
             path = "",
-            node = this.node,
             left = parseFloat(this._left),
             top = parseFloat(this._top),
             fill = this.get("fill");
@@ -766,7 +765,7 @@ SVGDrawing.prototype = {
             Y.Lang.trim(path);
             if(path)
             {
-                node.setAttribute("d", path);
+                this._nodeAttrFlags.d = path;
             }
 
             this._path = path;
@@ -959,7 +958,9 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
 		var host = this,
             graphic = cfg.graphic,
             data = this.get("data");
-		host.createNode();
+		this._nodeAttrFlags = {};
+        this._nodeCSSFlags = {};
+        host.createNode();
 		if(graphic)
         {
             host._setGraphic(graphic);
@@ -1154,17 +1155,17 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
         );
         if(id)
 		{
-			node.setAttribute("id", id);
+			this._nodeAttrFlags.id = id;
 		}
 		if(pointerEvents)
 		{
-			node.setAttribute("pointer-events", pointerEvents);
+			this._nodeAttrFlags["pointer-events"] = pointerEvents;
 		}
         if(!host.get("visible"))
         {
-            Y.DOM.setStyle(node, "visibility", "hidden");
+            this._nodeCSSFlags.visibility = "hidden";
         }
-        Y.DOM.setAttribute(this.node, "shape-rendering", this.get("shapeRendering"));
+        this._nodeAttrFlags["shape-rendering"] = this.get("shapeRendering");
 	},
 
 
@@ -1194,8 +1195,7 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
 	 */
 	_strokeChangeHandler: function()
 	{
-		var node = this.node,
-			stroke = this.get("stroke"),
+		var stroke = this.get("stroke"),
 			strokeOpacity,
 			dashstyle,
 			dash,
@@ -1210,28 +1210,28 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
 			stroke.weight = stroke.weight || 1;
 			stroke.opacity = Y_LANG.isNumber(strokeOpacity) ? strokeOpacity : 1;
 			stroke.linecap = stroke.linecap || "butt";
-			node.setAttribute("stroke-dasharray", dash);
-			node.setAttribute("stroke", stroke.color);
-			node.setAttribute("stroke-linecap", stroke.linecap);
-			node.setAttribute("stroke-width",  stroke.weight);
-			node.setAttribute("stroke-opacity", stroke.opacity);
+			this._nodeAttrFlags["stroke-dasharray"] = dash;
+			this._nodeAttrFlags.stroke = stroke.color;
+			this._nodeAttrFlags["stroke-linecap"] = stroke.linecap;
+			this._nodeAttrFlags["stroke-width"] = stroke.weight;
+			this._nodeAttrFlags["stroke-opacity"] = stroke.opacity;
 			if(linejoin === "round" || linejoin === "bevel")
 			{
-				node.setAttribute("stroke-linejoin", linejoin);
+				this._nodeAttrFlags["stroke-linejoin"] = linejoin;
 			}
 			else
 			{
 				linejoin = parseInt(linejoin, 10);
 				if(Y_LANG.isNumber(linejoin))
 				{
-					node.setAttribute("stroke-miterlimit",  Math.max(linejoin, 1));
-					node.setAttribute("stroke-linejoin", "miter");
+					this._nodeAttrFlags["stroke-miterlimit"] = Math.max(linejoin, 1);
+					this._nodeAttrFlags["stroke-linejoin"] = "miter";
 				}
 			}
 		}
 		else
 		{
-			node.setAttribute("stroke", "none");
+			this._nodeAttrFlags.stroke = "none";
 		}
 	},
 
@@ -1243,8 +1243,7 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
 	 */
 	_fillChangeHandler: function()
 	{
-		var node = this.node,
-			fill = this.get("fill"),
+		var fill = this.get("fill"),
 			fillOpacity,
 			type;
 		if(fill)
@@ -1253,23 +1252,23 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
 			if(type === "linear" || type === "radial")
 			{
 				this._setGradientFill(fill);
-				node.setAttribute("fill", "url(#grad" + this.get("id") + ")");
+				this._nodeAttrFlags.fill =  "url(#grad" + this.get("id") + ")";
 			}
 			else if(!fill.color)
 			{
-				node.setAttribute("fill", "none");
+				this._nodeAttrFlags.fill = "none";
 			}
 			else
 			{
                 fillOpacity = parseFloat(fill.opacity);
 				fillOpacity = Y_LANG.isNumber(fillOpacity) ? fillOpacity : 1;
-				node.setAttribute("fill", fill.color);
-				node.setAttribute("fill-opacity", fillOpacity);
+				this._nodeAttrFlags.fill = fill.color;
+				this._nodeAttrFlags["fill-opacity"] = fillOpacity;
 			}
 		}
 		else
 		{
-			node.setAttribute("fill", "none");
+			this._nodeAttrFlags.fill =  "none";
 		}
 	},
 
@@ -1553,7 +1552,6 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
 	_updateTransform: function()
 	{
 		var isPath = this._type === "path",
-            node = this.node,
 			key,
 			transform,
 			transformOrigin,
@@ -1609,7 +1607,7 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
         this._graphic.addToRedrawQueue(this);
         if(transform)
 		{
-            node.setAttribute("transform", transform);
+            this._nodeAttrFlags.transform = transform;
         }
         if(!isPath)
         {
@@ -1625,13 +1623,12 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
 	 */
 	_draw: function()
 	{
-		var node = this.node;
-		node.setAttribute("width", this.get("width"));
-		node.setAttribute("height", this.get("height"));
-		node.setAttribute("x", this._x);
-		node.setAttribute("y", this._y);
-		node.style.left = this._x + "px";
-		node.style.top = this._y + "px";
+		this._nodeAttrFlags.width = this.get("width");
+		this._nodeAttrFlags.height = this.get("height");
+		this._nodeAttrFlags.x = this._x;
+		this._nodeAttrFlags.y = this._y;
+		this._nodeCSSFlags.left = this._x + "px";
+		this._nodeCSSFlags.top = this._y + "px";
 		this._fillChangeHandler();
 		this._strokeChangeHandler();
 		this._updateTransform();
@@ -1758,6 +1755,29 @@ Y.extend(SVGShape, Y.GraphicBase, Y.mix({
     },
 
     /**
+     * Updates attributes and styles for the node.
+     *
+     * @method _clearFlags
+     * @private
+     */
+    _clearFlags: function() {
+        var key;
+        for(key in this._nodeAttrFlags) {
+            if(this._nodeAttrFlags.hasOwnProperty(key)) {
+                this.node.setAttribute(key, this._nodeAttrFlags[key]);
+            }
+        }
+        for(key in this._nodeCSSFlags) {
+            if(this._nodeCSSFlags.hasOwnProperty(key)) {
+                Y.DOM.setStyle(this.node, key, this._nodeCSSFlags[key]);
+                //this.node.style[key] = this._nodeCSSFlags[key];
+            }
+        }
+        this._nodeAttrFlags = {};
+        this._nodeCSSFlags = {};
+    },
+
+    /**
      * Destroys the shape instance.
      *
      * @method destroy
@@ -1873,7 +1893,7 @@ SVGShape.ATTRS = {
 			var node = this.node;
 			if(node)
 			{
-				node.setAttribute("id", val);
+				this._nodeAttrFlags.id = val;
 			}
 			return val;
 		}
@@ -2123,7 +2143,7 @@ SVGShape.ATTRS = {
 				node = this.node;
 			if(node)
 			{
-				node.setAttribute("pointer-events", val);
+				this._nodeAttrFlags["pointer-events"] = val;
 			}
 			return val;
 		},
@@ -2133,7 +2153,7 @@ SVGShape.ATTRS = {
 			var node = this.node;
 			if(node)
 			{
-				node.setAttribute("pointer-events", val);
+				this._nodeAttrFlags["pointer-events"] = val;
 			}
 			return val;
 		}
@@ -2373,8 +2393,7 @@ Y.extend(SVGEllipse, SVGShape, {
 	 */
 	_draw: function()
 	{
-		var node = this.node,
-			w = this.get("width"),
+		var w = this.get("width"),
 			h = this.get("height"),
 			x = this.get("x"),
 			y = this.get("y"),
@@ -2382,10 +2401,10 @@ Y.extend(SVGEllipse, SVGShape, {
 			yRadius = h * 0.5,
 			cx = x + xRadius,
 			cy = y + yRadius;
-		node.setAttribute("rx", xRadius);
-		node.setAttribute("ry", yRadius);
-		node.setAttribute("cx", cx);
-		node.setAttribute("cy", cy);
+		this._nodeAttrFlags.rx = xRadius;
+		this._nodeAttrFlags.ry = yRadius;
+		this._nodeAttrFlags.cx = cx;
+		this._nodeAttrFlags.cy = cy;
 		this._fillChangeHandler();
 		this._strokeChangeHandler();
 		this._updateTransform();
@@ -2477,15 +2496,14 @@ Y.SVGEllipse = SVGEllipse;
      */
     _draw: function()
     {
-        var node = this.node,
-            x = this.get("x"),
+        var x = this.get("x"),
             y = this.get("y"),
             radius = this.get("radius"),
             cx = x + radius,
             cy = y + radius;
-        node.setAttribute("r", radius);
-        node.setAttribute("cx", cx);
-        node.setAttribute("cy", cy);
+        this._nodeAttrFlags.r = radius;
+        this._nodeAttrFlags.cx = cx;
+        this._nodeAttrFlags.cy = cy;
         this._fillChangeHandler();
         this._strokeChangeHandler();
         this._updateTransform();
@@ -3306,7 +3324,9 @@ Y.extend(SVGGraphic, Y.GraphicBase, {
             computedHeight,
             computedLeft,
             computedTop,
-            node;
+            node,
+            key,
+            shapes = this._shapes;
         if(autoSize)
         {
             if(autoSize === "sizeContentToGraphic")
@@ -3338,6 +3358,11 @@ Y.extend(SVGGraphic, Y.GraphicBase, {
                 computedHeight = height;
                 computedLeft = left;
                 computedTop = top;
+        }
+        for(key in shapes) {
+            if(shapes.hasOwnProperty(key)) {
+                shapes[key]._clearFlags();
+            }
         }
         if(this._contentNode)
         {
