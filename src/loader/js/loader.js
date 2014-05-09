@@ -2865,7 +2865,7 @@ Y.log('Undefined module: ' + mname + ', matched a pattern: ' +
     core and gallery groups, and just "$root" for all other groups.
     @method _aggregateGroups
     @param {Array} modules A list of module meta.
-    @return {Object} Aggregated groups of module meta.
+    @return {Array} An array containing objects with key references and aggregated groups of module meta.
     @private
     */
     _aggregateGroups: function (modules) {
@@ -2876,7 +2876,8 @@ Y.log('Undefined module: ' + mname + ', matched a pattern: ' +
             mod,
             key,
             len,
-            i;
+            i,
+            groups = [];
 
         // Segment the modules for efficient combo encoding.
         for (i = 0, len = modules.length; i < len; i += 1) {
@@ -2946,10 +2947,16 @@ Y.log('Undefined module: ' + mname + ', matched a pattern: ' +
                 key = 'path' + SUB_GROUP_DELIM + name;
             }
 
-            source[key] = source[key] || [];
+            if(!source[key]) {
+                source[key] = [];
+                groups.push({
+                    key: key,
+                    modules: source[key]
+                });
+            }
             source[key].push(name);
         }
-        return source;
+        return groups;
     },
 
     /**
@@ -3021,30 +3028,26 @@ Y.log('Undefined module: ' + mname + ', matched a pattern: ' +
     in Yahoo's infrastructure by encoding predictable combo urls across browsers
     since iterating over an object does not guarantee order.
     @method _sortAggregatedGroups
-    @param {Object} groups Aggregated groups.
+    @param {Array} groups Aggregated groups.
     @return {Array} Sorted groups.
     @private
     **/
     _sortAggregatedGroups: function (groups) {
-        var sorted = [],
-            key,
+        var sorted = groups.concat(),
             len,
             i;
-
-        for (key in groups) {
-            if (groups.hasOwnProperty(key)) {
-                sorted.push({
-                    key: key,
-                    modules: groups[key]
-                });
-            }
-        }
-
+       
         // Sort the groups.
         sorted.sort(function (a, b) {
-            return a.key > b.key;
+            if(a.key < b.key) {
+                return -1;
+            } else if (a.key > b.key) {
+                return 1;
+            } else {
+                return 0;
+            }
         });
-
+        
         // Sort the modules.
         for (i = 0, len = sorted.length; i < len; i += 1) {
             sorted[i].modules.sort();
