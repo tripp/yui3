@@ -11,7 +11,7 @@ YUI.add('gesture-tests', function(Y) {
             fire: noop
         },
         node = Y.one('#tester'),
-        hasMsTouchActionSupport = (node.getDOMNode().style && ("msTouchAction" in node.getDOMNode().style)),
+        hasMsTouchActionSupport = (Y.config.win && ("msTouchAction" in Y.config.win.navigator)),
         event = {
             target: node,
             currentTarget: node,
