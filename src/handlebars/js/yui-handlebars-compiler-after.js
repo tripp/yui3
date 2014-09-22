@@ -51,7 +51,7 @@ single step.
 @return {String} Rendered template string.
 */
 Handlebars.render = function (string, context, options) {
-    return Handlebars.compile(string)(context, options);
+    return this.compile(string)(context, options);
 };
 
 // The rest of this file is just API docs for methods defined in Handlebars
@@ -88,3 +88,19 @@ function.
 @param {Object} [options] Compiler options.
 @return {String} Precompiled template code.
 */
+Handlebars.precompile = function(string, options, env) {
+  var input = string; 
+  if (input == null || (typeof input !== 'string' && input.constructor !== Handlebars.AST.ProgramNode)) {
+    throw new Handlebars.Exception("You must pass a string or Handlebars AST to Handlebars.precompile. You passed " + input);
+  }
+  options = options || {};
+  if (!('data' in options)) {
+    options.data = true;
+  }
+  if (options.compat) {
+    options.useDepths = true;
+  }
+  var ast = Handlebars.parse(input);
+  var environment = new Handlebars.Compiler().compile(ast, options);
+  return new Handlebars.JavaScriptCompiler().compile(environment, options);
+};
